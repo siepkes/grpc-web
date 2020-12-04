@@ -116,11 +116,27 @@ class RequestHandler {
   private Class<?> getClassObject(String className) {
     Class rpcClass = null;
     try {
-      rpcClass = Class.forName(className + "Grpc");
+      String classNameString = getClassNameFromQualifiedName(className);
+      System.out.println("!!!!!!!!!!!!" + classNameString);
+      rpcClass = Class.forName(classNameString + "Grpc");
     } catch (ClassNotFoundException e) {
       LOG.info("no such class " + className);
     }
     return rpcClass;
+  }
+
+  /**
+   * gRPC messages can have package names. This method chops off the package name and returns the classname.
+   */
+  private String getClassNameFromQualifiedName(String qualifiedClassName) {
+    // The package name and service name is seperated by a dot.
+    String[] classNameSplit = qualifiedClassName.split("\\.");
+
+    if (classNameSplit.length > 0) {
+      return classNameSplit[classNameSplit.length - 1];
+    } else {
+      return qualifiedClassName;
+    }
   }
 
   private io.grpc.stub.AbstractStub getRpcStub(Channel ch, Class cls, String stubName) {
